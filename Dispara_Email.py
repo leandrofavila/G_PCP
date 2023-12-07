@@ -2,6 +2,7 @@ import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import smtplib
+import io
 
 
 class DisparaEmail:
@@ -13,11 +14,16 @@ class DisparaEmail:
         message = self.trata_email()
         password = "srengld21v3l1"
         msg['From'] = "ldeavila@sr.ind.br"
-        recipients = ["ldeavila@sr.ind.br"]
+        recipients = ["ldeavila@sr.ind.br"]#, 'rmoreira@sr.ind.br']
         msg['To'] = ", ".join(recipients)
         msg['Subject'] = subject
-        msg.attach(MIMEText(message, 'plain'))
-        server = smtplib.SMTP('10.40.3.12: 465')
+        if subject != "ITENS COMPRADOS COM EMBARQUE NÃO":
+            msg.attach(MIMEText(message, 'plain'))
+        else:
+            print('no else')
+            msg.attach(MIMEText(message, 'html'))
+
+        server = smtplib.SMTP('10.40.3.12:465')
         server.starttls()
         server.login(msg['From'], password)
         server.sendmail(msg['From'], recipients, msg.as_string())
@@ -25,7 +31,10 @@ class DisparaEmail:
 
 
     def trata_email(self):
-        nlis = self.sauda() + self.msg
+        if isinstance(self.msg, io.TextIOWrapper):
+            return self.msg
+        else:
+            nlis = self.sauda() + self.msg
         return nlis
 
 

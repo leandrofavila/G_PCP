@@ -5,13 +5,28 @@ from Dispara_Email import DisparaEmail
 
 env = Environment(loader=FileSystemLoader('.'))
 template = env.get_template('templates/index.html')
+
 db_instance = DB()
 df = db_instance.itens_comp_emb_nao()
-html_content = template.render(df=df)
+#print(df.to_string())
+curr_lis = df['Cod. Item Pai'].tolist()
 
-with open('output.html', 'w', encoding='utf-8') as file:
-    file.write(html_content)
+with open(rf"C:\Users\pcp03\PycharmProjects\G_PCP\last_lis.txt", 'r') as txt:
+    last_lis = [iten for iten in txt.read().split(', ')]
+    print(last_lis)
+    if last_lis is None or curr_lis != last_lis:
+        df_filtered = df[~df['Cod. Item Pai'].isin(last_lis)]
+        if not df_filtered.empty:
+            html_content = template.render(df=df_filtered)
 
-dispara_email = DisparaEmail(html_content)
+            with open('output.html', 'w', encoding='utf-8') as file:
+                file.write(html_content)
 
-dispara_email.dispara_email("ITENS COMPRADOS COM EMBARQUE NÃO")
+            dispara_email = DisparaEmail(html_content)
+            dispara_email.dispara_email("ITENS COMPRADOS COM EMBARQUE NÃO")
+
+    else:
+        print('Não há itens novos para mandar por email.')
+
+with open(rf"C:\Users\pcp03\PycharmProjects\G_PCP\last_lis.txt", 'w+') as text:
+    text.write(', '.join(map(str, curr_lis)))

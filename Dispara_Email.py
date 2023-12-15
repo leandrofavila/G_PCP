@@ -14,13 +14,12 @@ class DisparaEmail:
         message = self.trata_email()
         password = "srengld21v3l1"
         msg['From'] = "ldeavila@sr.ind.br"
-        recipients = ["ldeavila@sr.ind.br"]#, 'rmoreira@sr.ind.br']
+        recipients = ["ldeavila@sr.ind.br", 'rmoreira@sr.ind.br']
         msg['To'] = ", ".join(recipients)
         msg['Subject'] = subject
         if subject != "ITENS COMPRADOS COM EMBARQUE NÃO":
             msg.attach(MIMEText(message, 'plain'))
         else:
-            print('no else')
             msg.attach(MIMEText(message, 'html'))
 
         server = smtplib.SMTP('10.40.3.12:465')

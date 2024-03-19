@@ -22,9 +22,8 @@ with open(rf"C:\Users\pcp03\PycharmProjects\G_PCP\last_lis.txt", 'r') as txt:
             with open('output.html', 'w', encoding='utf-8') as file:
                 file.write(html_content)
 
-            dispara_email = DisparaEmail(html_content)
-            dispara_email.dispara_email("ITENS COMPRADOS COM EMBARQUE NÃO")
-
+            dispara_email = DisparaEmail(html_content, "ITENS COMPRADOS COM EMBARQUE NÃO")
+            dispara_email.dispara_email()
     else:
         print('Não há itens novos para mandar por email.')
 

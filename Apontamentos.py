@@ -20,16 +20,16 @@ def df_apont():
 def apont_0():
     df_0 = df_apont()[0]
     if not df_0.empty:
-        quit()
         corpo_email = 'Favor atentar para os apontamentos com quantidade 0 nas ordens:\n \n '
 
         for idx, x in df_0.iterrows():
             if str(x['NUM_ORDEM']) not in corpo_email:
-                corpo_email += f"\t-{x['NUM_ORDEM']} na sequência {str(x['OPERACAO']).rjust(3)}.\n"
+                corpo_email += f"\t-{x['NUM_ORDEM']} na operação {str(x['OPERACAO']).rjust(3)}.\n"
 
-        corpo_email += '''\nQualquer duvida estou a disposição.\n\nEmail de envio automatico, favor não responder.'''
-        dispara_email = DisparaEmail(corpo_email)
-        dispara_email.dispara_email("Ordens com quantidade apontada 0")
+        corpo_email += '''\nQualquer duvida entrar em contato com o PCP.\n
+        \nEmail de envio automatico, favor não responder.'''
+        disp_email = DisparaEmail(corpo_email, "Ordens com apontamentos quantidade 0")
+        disp_email.dispara_email()
     else:
         print('Não há ordens com quantidade 0 no apontamento')
 
@@ -42,9 +42,9 @@ def apont_maior():
         for idx, x in df_maior.iterrows():
             corpo_email += f"\t-{x['NUM_ORDEM']} na operação {x['OPERACAO'].rjust(3)}.\n"
 
-        corpo_email += '''\nQualquer duvida estou a disposição.\n\nEmail de envio automatico, favor não responder.'''
-        dispara_email = DisparaEmail(corpo_email)
-        dispara_email.dispara_email("Ordens com quantidade apontamento maior que da OP")
+        corpo_email += '''\nQualquer duvida entrar em contato com o PCP.\n
+        \nEmail de envio automatico, favor não responder.'''
+        DisparaEmail(corpo_email, "Ordens com apontamentos maior que a quantidade da OP")
     else:
         print('Não há ordens com quantidade maior que a demanda')
 
@@ -58,9 +58,9 @@ def apont_parcial():
             corpo_email += f"\t-{x['NUM_ORDEM']} na operação {str(x['OPERACAO']).rjust(13)} quantidade da OP " \
                            f"{str(x['QTDE']).rjust(3)} apontada {str(x['QUANTIDADE']).rjust(3)}.\n"
         corpo_email += '___________________________________________________________________________________________\n\n'
-        corpo_email += '''\nQualquer duvida estou a disposição.\n\nEmail de envio automatico, favor não responder.'''
-        dispara_email = DisparaEmail(corpo_email)
-        dispara_email.dispara_email("Ordens com apontamentos parciais")
+        corpo_email += '''\nQualquer duvida entrar em contato com o PCP.\n
+        \nEmail de envio automatico, favor não responder.'''
+        DisparaEmail(corpo_email, "Ordens com apontamentos parciais")
     else:
         print('Não há ordens com apontamento parcial')
 
@@ -77,9 +77,10 @@ def err_consumos():
                            f"essa não seja a {'ultima' if x['DESCRICAO'] == 'PINTAR' else 'primeira'} operação.\n"
 
         corpo_email += '___________________________________________________________________________________________\n\n'
-        corpo_email += '''\nQualquer duvida estou a disposição.\n\nEmail de envio automatico, favor não responder.'''
-        dispara_email = DisparaEmail(corpo_email)
-        dispara_email.dispara_email("Consumos na operação errada.")
+        corpo_email += '''\nQualquer duvida entrar em contato com o PCP.\n
+        \nEmail de envio automatico, favor não responder.'''
+        disp_email = DisparaEmail(corpo_email, "Consumos na operação errada. apontamentos")
+        disp_email.dispara_email()
     else:
         print('Não há ordens com consumos errados')
 

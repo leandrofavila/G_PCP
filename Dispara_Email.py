@@ -47,9 +47,10 @@ class DisparaEmail:
 
     def destinatarios(self):
         if 'EMBARQUE' in self.titulo:
-            return ["ldeavila@sr.ind.br", 'rmoreira@sr.ind.br', 'wesley@sr.ind.br', 'braian@sr.ind.br', 'mtasquetto@sr.ind.br',
-                    'fernando@sr.ind.br', 'jtomas@sr.ind.br', 'raphael@sr.ind.br', 'avirago@sr.ind.br',
-                    'luis@sr.ind.br', 'william@sr.ind.br', 'leduardo@sr.ind.br']
+            return ["ldeavila@sr.ind.br", 'rmoreira@sr.ind.br', 'wesley@sr.ind.br', 'braian@sr.ind.br',
+                    'mtasquetto@sr.ind.br', 'fernando@sr.ind.br', 'jtomas@sr.ind.br', 'raphael@sr.ind.br',
+                    'avirago@sr.ind.br', 'luis@sr.ind.br', 'william@sr.ind.br', 'leduardo@sr.ind.br', 'paola@sr.ind.br',
+                    'rafael@sr.ind.br']
         if '30 dias' in self.titulo:
             return ["ldeavila@sr.ind.br", 'producao@sr.ind.br', "qualidade@sr.ind.br", 'almoxarifado@sr.ind.br',
                     "expedicao@sr.ind.br"]

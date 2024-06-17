@@ -1,5 +1,6 @@
 from Con_BD import DB
 from jinja2 import Environment, FileSystemLoader
+from flask import Flask, render_template_string, url_for
 from Dispara_Email import DisparaEmail
 
 
@@ -24,6 +25,8 @@ with open(rf"C:\Users\pcp03\PycharmProjects\G_PCP\last_lis.txt", 'r') as txt:
 
             dispara_email = DisparaEmail(html_content, "ITENS COMPRADOS COM EMBARQUE NÃO")
             dispara_email.dispara_email()
+        else:
+            print('Não há itens novos para mandar por email.')
     else:
         print('Não há itens novos para mandar por email.')
 

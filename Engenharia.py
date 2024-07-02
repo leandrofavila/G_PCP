@@ -1,15 +1,13 @@
 from Con_BD import DB
 from jinja2 import Environment, FileSystemLoader
-from flask import Flask, render_template_string, url_for
 from Dispara_Email import DisparaEmail
 
 
 env = Environment(loader=FileSystemLoader('.'))
-template = env.get_template('templates/index.html')
+template = env.get_template(r'C:\Users\pcp03\PycharmProjects\G_PCP\templates\index.html')
 
 db_instance = DB()
 df = db_instance.itens_comp_emb_nao()
-#print(df.to_string())
 curr_lis = df['Cod. Item Pai'].tolist()
 
 with open(rf"C:\Users\pcp03\PycharmProjects\G_PCP\last_lis.txt", 'r') as txt:

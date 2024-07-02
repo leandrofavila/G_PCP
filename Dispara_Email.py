@@ -53,7 +53,7 @@ class DisparaEmail:
                     'rafael@sr.ind.br']
         if '30 dias' in self.titulo:
             return ["ldeavila@sr.ind.br", 'producao@sr.ind.br', "qualidade@sr.ind.br", 'almoxarifado@sr.ind.br',
-                    "expedicao@sr.ind.br"]
+                    "expedicao@sr.ind.br", "wesley@sr.ind.br"]
         if 'apontamentos' in self.titulo:
             return ["ldeavila@sr.ind.br", "vagner@sr.ind.br", "wesley@sr.ind.br"]
 

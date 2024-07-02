@@ -21,9 +21,10 @@ writer.close()
 
 
 if df_res:
-    corpo_email = '''\nSegue em anexo listagem de ordens em aberto a mais de 30 dias.
+    corpo_email = '''
+    \nSegue em anexo listagem de ordens em aberto a mais de 30 dias.
     \nQualquer duvida entrar em contato com o PCP.
-    \nEmail de envio automatico, favor não responder.'''
+    '''
     file_path = "C:\\Users\\pcp03\\PycharmProjects\\G_PCP\\Ops_abertas_mais_30_dias.xlsx"
     disp_email = DisparaEmail(corpo_email, "Ordens em aberto a mais de 30 dias.", "Ops_abertas_mais_30_dias.xlsx")
     disp_email.dispara_email()

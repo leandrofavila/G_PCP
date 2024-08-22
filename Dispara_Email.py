@@ -50,10 +50,10 @@ class DisparaEmail:
             return ["ldeavila@sr.ind.br", 'rmoreira@sr.ind.br', 'wesley@sr.ind.br', 'braian@sr.ind.br',
                     'mtasquetto@sr.ind.br', 'fernando@sr.ind.br', 'jtomas@sr.ind.br', 'raphael@sr.ind.br',
                     'avirago@sr.ind.br', 'luis@sr.ind.br', 'william@sr.ind.br', 'leduardo@sr.ind.br', 'paola@sr.ind.br',
-                    'rafael@sr.ind.br']
+                    'rafael@sr.ind.br', 'lsilveira@sr.ind.br']
         if '30 dias' in self.titulo:
             return ["ldeavila@sr.ind.br", 'producao@sr.ind.br', "qualidade@sr.ind.br", 'almoxarifado@sr.ind.br',
-                    "expedicao@sr.ind.br", "wesley@sr.ind.br"]
+                    "expedicao@sr.ind.br", "wesley@sr.ind.br", "felipe@sr.ind.br"]
         if 'apontamentos' in self.titulo:
             return ["ldeavila@sr.ind.br", "vagner@sr.ind.br", "wesley@sr.ind.br"]
 

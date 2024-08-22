@@ -59,11 +59,10 @@ class DB:
         return df_consumos
 
 
-
     def itens_comp_emb_nao(self):
         cur = self.get_connection()
         cur.execute(
-            r"SELECT DISTINCT TITPAI.COD_ITEM, CAD.SEQ_ORD, TITFIL.COD_ITEM, TITFIL.DESC_TECNICA,  "
+            r"SELECT DISTINCT TITPAI.COD_ITEM, CAD.SEQ_ORD, TITFIL.COD_ITEM, TITFIL.DESC_TECNICA, "
             r"DECODE(CAD.EMBARQUE, '0', 'NAO', '1', 'SIM') EMBARQUE "
             r"FROM FOCCO3I.TITENS_ENGENHARIA ENGPAI "
             r"INNER JOIN FOCCO3I.TITENS_EMPR EMPPAI       ON EMPPAI.ID = ENGPAI.ITEMPR_ID "
@@ -80,7 +79,7 @@ class DB:
             r"AND TITFIL.SIT=1 "
             r"AND TITPAI.SIT=1 "
             r"AND TITPAI.DESC_TECNICA NOT LIKE '%KIT PARAF%' "
-            r"AND TITFIL.DESC_TECNICA NOT LIKE '%NAO USAR%' " 
+            r"AND TITFIL.DESC_TECNICA NOT LIKE '%NAO USAR%' "
         )
         comp_emb_no = pd.DataFrame(cur.fetchall(), columns=["Cod. Item Pai", "Seq. na Estrutura",
                                                             "Cod. Filho", "Desc. Técnica", "Valor do Campo Embarque"])
@@ -124,3 +123,82 @@ class DB:
                                                             "DESC_PEDIDO", "LOCAL_PROD"])
         cur.close()
         return ops_abertas
+
+
+    def planejador_errado(self):
+        cur = self.get_connection()
+        cur.execute(
+            r"SELECT TOR.NUM_ORDEM, TFU.NOME,  LISTAGG(TOP.DESCRICAO || '|' || MAQ.DESCRICAO || '|') WITHIN GROUP (ORDER BY ROT.ID) AS SEQ "
+            r"FROM FOCCO3I.TORDENS TOR "
+            r"INNER JOIN FOCCO3I.TFUNCIONARIOS TFU    ON TFU.ID = TOR.FUNC_ID "
+            r"INNER JOIN FOCCO3I.TORDENS_ROT ROT      ON ROT.ORDEM_ID = TOR.ID "
+            r"INNER JOIN FOCCO3I.TROTEIRO TRO         ON ROT.TROTEIRO_ID = TRO.ID "
+            r"INNER JOIN FOCCO3I.TOPERACAO TOP        ON TRO.OPERACAO_ID = TOP.ID "
+            r"INNER JOIN FOCCO3I.TROT_FAB_MAQ RMAQ    ON RMAQ.TROTEIRO_ID = TRO.ID "
+            r"INNER JOIN FOCCO3I.TMAQUINAS MAQ        ON RMAQ.MAQUINA_ID = MAQ.ID  "
+            r"WHERE TOR.TIPO_ORDEM IN ('OFA','OFM') "
+            r"GROUP BY TOR.NUM_ORDEM, TFU.NOME "
+        )
+        planejador_errado = pd.DataFrame(cur.fetchall(), columns=["NUM_ORDEM", "PLANEJADOR", "SEQ"])
+        cur.close()
+        return planejador_errado
+
+
+    def filhas_pm(self, car, num_ordem):
+        cur = self.get_connection()
+        num_ordem = ', '.join(num_ordem)
+        cur.execute(
+            r"SELECT DISTINCT TOR.NUM_ORDEM "
+            r"FROM FOCCO3I.TCAD_EST_ITE EST "
+            r"INNER JOIN FOCCO3I.TITENS FIL                       ON FIL.ID = EST.FILHO_ID "
+            r"INNER JOIN FOCCO3I.TITENS_EMPR EMP                  ON EMP.ITEM_ID = FIL.ID "
+            r"INNER JOIN FOCCO3I.TITENS_ENGENHARIA ENG            ON ENG.ITEMPR_ID = EMP.ID "
+            r"INNER JOIN FOCCO3I.TITENS_PLANEJAMENTO PLA          ON PLA.ITEMPR_ID = EMP.ID "
+            r"INNER JOIN FOCCO3I.TORDENS TOR                      ON TOR.ITPL_ID = PLA.ID "
+            r"INNER JOIN FOCCO3I.TDEMANDAS TDE                    ON PLA.ID = TDE.ITPL_ID "
+            r"INNER JOIN FOCCO3I.TSRENG_ORDENS_VINC_CAR VINC      ON TOR.ID = VINC.ORDEM_ID "
+            r"INNER JOIN FOCCO3I.TSRENGENHARIA_CARREGAMENTOS CAR  ON VINC.CARERGAM_ID = CAR.ID                                            "
+            r"WHERE ENG.TP_ITEM = 'F' "
+            r"AND PLA.FANTASMA = 0 "
+            r"AND TDE.ALMOX_ID NOT IN (590, 591) "
+            r"AND CAR.CARREGAMENTO IN ("+str(car)+") "
+            r"START WITH EST.PAI_ID IN ( "
+            r"            SELECT TIT.ID FROM FOCCO3I.TITENS TIT "
+            r"            INNER JOIN FOCCO3I.TITENS_PLANEJAMENTO PLA  ON PLA.COD_ITEM = TIT.COD_ITEM "
+            r"            INNER JOIN FOCCO3I.TORDENS TOR              ON TOR.ITPL_ID = PLA.ID  "
+            r"            WHERE TOR.NUM_ORDEM IN ("+str(num_ordem)+") "
+            r"            ) "
+            r"CONNECT BY PRIOR EST.FILHO_ID = EST.PAI_ID "
+        )
+        filhas_pm = pd.DataFrame(cur.fetchall(), columns=["NUM_ORDEM"])
+        cur.close()
+        return filhas_pm["NUM_ORDEM"].tolist()
+
+
+    def ordens_carregamento(self, car, pms_only=None):
+        cur = self.get_connection()
+        if pms_only:
+            pms = "AND TFUN.NOME = 'PL009 - PRE-MONTAGEM (PRODUCAO)'"
+        else:
+            pms = ''
+        cur.execute(
+            r"SELECT DISTINCT TOR.NUM_ORDEM, TPL.COD_ITEM, TIT.DESC_TECNICA, TOR.QTDE "
+            r"FROM FOCCO3I.TITENS_PLANEJAMENTO TPL "
+            r"INNER JOIN FOCCO3I.TITENS_EMPR EMP                  ON TPL.ITEMPR_ID = EMP.ID "
+            r"INNER JOIN FOCCO3I.TITENS TIT                       ON EMP.ITEM_ID = TIT.ID  "
+            r"INNER JOIN FOCCO3I.TORDENS TOR                      ON TPL.ID = TOR.ITPL_ID "
+            r"INNER JOIN FOCCO3I.TDEMANDAS TDE                    ON TOR.ID = TDE.ORDEM_ID "
+            r"INNER JOIN FOCCO3I.TORDENS_ROT ROT                  ON TOR.ID = ROT.ORDEM_ID "
+            r"INNER JOIN FOCCO3I.TORD_ROT_FAB_MAQ FAB             ON ROT.ID = FAB.TORDEN_ROT_ID "
+            r"INNER JOIN FOCCO3I.TMAQUINAS MAQ                    ON FAB.MAQUINA_ID = MAQ.ID "
+            r"INNER JOIN FOCCO3I.TITENS_PLAN_FUNC PLA             ON TPL.ID = PLA.ITPL_ID "
+            r"INNER JOIN FOCCO3I.TFUNCIONARIOS TFUN               ON PLA.FUNC_ID = TFUN.ID " 
+            r"INNER JOIN FOCCO3I.TSRENG_ORDENS_VINC_CAR VINC      ON TOR.ID = VINC.ORDEM_ID " 
+            r"INNER JOIN FOCCO3I.TSRENGENHARIA_CARREGAMENTOS CAR  ON VINC.CARERGAM_ID = CAR.ID " 
+            r"WHERE CAR.CARREGAMENTO IN ("+car+")  "
+            r""+pms+" "
+        )
+        ordens_pm_carregamento = pd.DataFrame(cur.fetchall(), columns=["NUM_ORDEM", "COD_ITEM", "DESC_TECNICA", "QTDE"])
+        cur.close()
+        return ordens_pm_carregamento
+        

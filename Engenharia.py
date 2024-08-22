@@ -4,7 +4,7 @@ from Dispara_Email import DisparaEmail
 
 
 env = Environment(loader=FileSystemLoader('.'))
-template = env.get_template(r'C:\Users\pcp03\PycharmProjects\G_PCP\templates\index.html')
+template = env.get_template("templates/index.html")
 
 db_instance = DB()
 df = db_instance.itens_comp_emb_nao()
@@ -18,7 +18,7 @@ with open(rf"C:\Users\pcp03\PycharmProjects\G_PCP\last_lis.txt", 'r') as txt:
         if not df_filtered.empty:
             html_content = template.render(df=df_filtered)
 
-            with open('output.html', 'w', encoding='utf-8') as file:
+            with open('templates/output.html', 'w', encoding='utf-8') as file:
                 file.write(html_content)
 
             dispara_email = DisparaEmail(html_content, "ITENS COMPRADOS COM EMBARQUE NÃO")

@@ -44,13 +44,13 @@ class DB:
             r"LEFT JOIN FOCCO3I.TITENS_EMPR EMP   ON TCO.ITEMPR_ID = EMP.ID "
             r"WHERE TOR.TIPO_ORDEM IN ('OFA') "
             r"AND ROT.SEQ " + sentido + " ( "
-            r"    SELECT " + lado + "(SEQ)  "
-            r"    FROM FOCCO3I.TORDENS_ROT SUB_ROT  "
-            r"    WHERE SUB_ROT.ORDEM_ID = ROT.ORDEM_ID "
-            r") "
-            r"AND EMP.COD_ITEM IS NOT NULL "
-            r"AND EMP.COD_ITEM " + igualdade + " 55955 "
-            r"GROUP BY TOR.NUM_ORDEM, TOP.DESCRICAO, ROT.SEQ "
+                                        r"    SELECT " + lado + "(SEQ)  "
+                                                                r"    FROM FOCCO3I.TORDENS_ROT SUB_ROT  "
+                                                                r"    WHERE SUB_ROT.ORDEM_ID = ROT.ORDEM_ID "
+                                                                r") "
+                                                                r"AND EMP.COD_ITEM IS NOT NULL "
+                                                                r"AND EMP.COD_ITEM " + igualdade + " 55955 "
+                                                                                                   r"GROUP BY TOR.NUM_ORDEM, TOP.DESCRICAO, ROT.SEQ "
         )
         df_consumos = pd.DataFrame(cur.fetchall(), columns=["NUM_ORDEM", "COD_ITEM", "DESCRICAO", "SEQ"])
         cur.close()
@@ -156,13 +156,13 @@ class DB:
             r"AND PLA.FANTASMA = 0 "
             r"AND TDE.ALMOX_ID NOT IN (590, 591) "
             r"AND CAR.CARREGAMENTO IN (" + str(car) + ") "
-            r"START WITH EST.PAI_ID IN ( "
-            r"            SELECT TIT.ID FROM FOCCO3I.TITENS TIT "
-            r"            INNER JOIN FOCCO3I.TITENS_PLANEJAMENTO PLA  ON PLA.COD_ITEM = TIT.COD_ITEM "
-            r"            INNER JOIN FOCCO3I.TORDENS TOR              ON TOR.ITPL_ID = PLA.ID  "
-            r"            WHERE TOR.NUM_ORDEM IN (" + str(num_ordem) + ") "
-            r"            ) "
-            r"CONNECT BY PRIOR EST.FILHO_ID = EST.PAI_ID "
+                                                      r"START WITH EST.PAI_ID IN ( "
+                                                      r"            SELECT TIT.ID FROM FOCCO3I.TITENS TIT "
+                                                      r"            INNER JOIN FOCCO3I.TITENS_PLANEJAMENTO PLA  ON PLA.COD_ITEM = TIT.COD_ITEM "
+                                                      r"            INNER JOIN FOCCO3I.TORDENS TOR              ON TOR.ITPL_ID = PLA.ID  "
+                                                      r"            WHERE TOR.NUM_ORDEM IN (" + str(num_ordem) + ") "
+                                                                                                                 r"            ) "
+                                                                                                                 r"CONNECT BY PRIOR EST.FILHO_ID = EST.PAI_ID "
         )
         filhas_pm = pd.DataFrame(cur.fetchall(), columns=["NUM_ORDEM"])
         cur.close()
@@ -189,7 +189,7 @@ class DB:
             r"INNER JOIN FOCCO3I.TSRENG_ORDENS_VINC_CAR VINC      ON TOR.ID = VINC.ORDEM_ID "
             r"INNER JOIN FOCCO3I.TSRENGENHARIA_CARREGAMENTOS CAR  ON VINC.CARERGAM_ID = CAR.ID "
             r"WHERE CAR.CARREGAMENTO IN (" + car + ")  "
-            r"" + pms + " "
+                                                   r"" + pms + " "
         )
         ordens_pm_carregamento = pd.DataFrame(cur.fetchall(), columns=["NUM_ORDEM", "COD_ITEM", "DESC_TECNICA", "QTDE"])
         cur.close()
@@ -235,8 +235,6 @@ class DB:
         cur.close()
         return op_data
 
-
-
     def progamaveis_car(self, carregamento):
         cur = self.get_connection()
         carregamento = ', '.join(carregamento)
@@ -259,12 +257,31 @@ class DB:
             r"                FROM FOCCO3I.TORDENS TOR "
             r"                INNER JOIN FOCCO3I.TSRENG_ORDENS_VINC_CAR VINC      ON TOR.ID = VINC.ORDEM_ID "
             r"                INNER JOIN FOCCO3I.TSRENGENHARIA_CARREGAMENTOS CAR  ON VINC.CARERGAM_ID = CAR.ID "
-            r"                WHERE CAR.CARREGAMENTO IN ("+str(carregamento)+") "                                                                                                                                                                      
-            r"                ) "  
-            r"AND (MAQ.DESCRICAO LIKE '%PUNCIONADEIRA%'  OR MAQ.DESCRICAO LIKE '%LASER%' OR MAQ.DESCRICAO LIKE '%PLASMA%') "  
-            r"GROUP BY TPL.COD_ITEM, TOR.NUM_ORDEM, TOR.QTDE, TIT.DESC_TECNICA, TFUN.NOME, TOR.tipo_ordem "
+            r"                WHERE CAR.CARREGAMENTO IN (" + str(carregamento) + ") "
+                                                                                 r"                ) "
+                                                                                 r"AND (MAQ.DESCRICAO LIKE '%PUNCIONADEIRA%'  OR MAQ.DESCRICAO LIKE '%LASER%' OR MAQ.DESCRICAO LIKE '%PLASMA%') "
+                                                                                 r"GROUP BY TPL.COD_ITEM, TOR.NUM_ORDEM, TOR.QTDE, TIT.DESC_TECNICA, TFUN.NOME, TOR.tipo_ordem "
         )
         progamaveis_car = cur.fetchall()
         progamaveis_car = pd.DataFrame(progamaveis_car, columns=['COD_ITEM', 'NUM_ORDEM', 'QTDE'])
         return progamaveis_car
-    
+
+    def qtd_ops_apont_parciais(self, lis_ordens):
+        cur = self.get_connection()
+        ordens = ', '.join(lis_ordens)
+        cur.execute(
+            r"SELECT TOR.NUM_ORDEM,  "
+            r"       TOR.QTDE,  "
+            r"       MOV.QUANTIDADE, "
+            r"       TOP.DESCRICAO, "
+            r"       TOR.TIPO_ORDEM "
+            r"FROM FOCCO3I.TORDENS TOR "
+            r"INNER JOIN FOCCO3I.TORDENS_ROT ORD    ON TOR.ID = ORD.ORDEM_ID "
+            r"INNER JOIN FOCCO3I.TROTEIRO ROT       ON ORD.TROTEIRO_ID = ROT.ID "
+            r"LEFT JOIN FOCCO3I.TOPERACAO TOP       ON ROT.OPERACAO_ID = TOP.ID "
+            r"LEFT JOIN FOCCO3I.TORDENS_MOVTO MOV   ON MOV.TORDEN_ROT_ID = ORD.ID  "
+            r"WHERE TOR.NUM_ORDEM IN (" + str(ordens) + ") "
+        )
+        qtd_disp_ops = cur.fetchall()
+        qtd_disp_ops = pd.DataFrame(qtd_disp_ops, columns=['NUM_ORDEM', 'QTD_ORDEM', 'QTD_APONT', 'OPERACAO', 'TP_ORDEM'])
+        return qtd_disp_ops

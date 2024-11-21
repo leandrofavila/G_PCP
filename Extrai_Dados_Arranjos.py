@@ -8,6 +8,10 @@ class TRATA_PDF:
     def __init__(self, cod_barras):
         self.cod_barras = cod_barras
         self.text = None
+        self.ct = 0
+        self.extract_text_from_page()
+
+
 
     def find_pdf(self):
         base_name = self.cod_barras[:7]
@@ -20,32 +24,44 @@ class TRATA_PDF:
         if os.path.exists(arranjo):
             return arranjo
 
+        arranjo = f'Y:\\Cnc\\Puncionadeira_Cnc\\PDF_Xml\\{base_name}.PDF'
+        if os.path.exists(arranjo):
+            return arranjo
+
         print('Arranjo não encontrado em nenhum dos diretórios.')
         return None
 
-    def extract_text_from_page(self):
-        # todo cuidado ta usando os ultimos digitos do codigo de barras como a pagina do arranjo pode ser que nem sempre bata esse valor confere
 
-        if self.text is None:
-            path = self.find_pdf()
-            pagina = self.cod_barras[7:]
-            reader = PdfReader(path)
-            page = reader.pages[int(pagina)]
+    def extract_text_from_page(self, pagina=None):
+
+        pg = int(self.cod_barras[7:]) - 1
+        if pagina is not None:
+            pg += pagina
+
+        path = self.find_pdf()
+        reader = PdfReader(path)
+
+        try:
+            page = reader.pages[pg]
             self.text = page.extract_text()
-            #print(self.text)
-        return self.text
+        except IndexError:
+            self.text = None
 
-    def get_multiplicador(self):
-        text = self.extract_text_from_page()
-        match = re.search(r'Peso total:\d+', text)
-        multiplicador = match.group(0)[11:]
-        return multiplicador
+        if self.text is None or self.cod_barras not in self.text:
+            self.ct += 1
+            if self.ct >= len(reader.pages):
+                return None
+            return self.extract_text_from_page(pagina=self.ct)
+
+        return self.text
 
 
     def get_data(self):
+        multiplicador = self.get_multiplicador()
+
         ordens_qtd = []
         ordens_qtd.extend(re.findall(
-            r'^\d+\s\d+\s\d+\s\d+\.\d{2}\smm\s\d+\.\d{2}\smm\s\d+$', self.extract_text_from_page(), flags=re.MULTILINE
+            r'^\d+\s\d+\s\d+\s\d+\.\d{2}\smm\s\d+\.\d{2}\smm\s\d+$', self.text, flags=re.MULTILINE
         ))
         lis_to_dic = [list(w.split()) for w in set(ordens_qtd)]
 
@@ -55,12 +71,23 @@ class TRATA_PDF:
         df = df.drop(columns=['id', 'Width_Unit', 'Height_Unit'])
 
         df = df.groupby(['cod_item', 'Width', 'Height', 'num_ordem'], as_index=False)['qtd'].sum()
-        multiplicador = self.get_multiplicador()
+
         df['qtd'] = df['qtd'].astype(int) * int(multiplicador)
         return df
 
 
+    def get_multiplicador(self):
+        match = re.search(r'Peso total:\d+', self.text)
+        if match is None:
+            self.text = self.extract_text_from_page(int(self.cod_barras[7:]) + 1)
+            match = re.search(r'Peso total:\d+', self.text)
+
+        multiplicador = match.group(0)[11:]
+
+        return multiplicador
+
+
 
 if __name__ == "__main__":
-    tr_pdf = TRATA_PDF('12109406')
+    tr_pdf = TRATA_PDF('12109403')
     print(tr_pdf.get_data().to_string())

@@ -258,9 +258,9 @@ class DB:
             r"                INNER JOIN FOCCO3I.TSRENG_ORDENS_VINC_CAR VINC      ON TOR.ID = VINC.ORDEM_ID "
             r"                INNER JOIN FOCCO3I.TSRENGENHARIA_CARREGAMENTOS CAR  ON VINC.CARERGAM_ID = CAR.ID "
             r"                WHERE CAR.CARREGAMENTO IN (" + str(carregamento) + ") "
-                                                                                 r"                ) "
-                                                                                 r"AND (MAQ.DESCRICAO LIKE '%PUNCIONADEIRA%'  OR MAQ.DESCRICAO LIKE '%LASER%' OR MAQ.DESCRICAO LIKE '%PLASMA%') "
-                                                                                 r"GROUP BY TPL.COD_ITEM, TOR.NUM_ORDEM, TOR.QTDE, TIT.DESC_TECNICA, TFUN.NOME, TOR.tipo_ordem "
+            r"                ) "
+            r"AND (MAQ.DESCRICAO LIKE '%PUNCIONADEIRA%'  OR MAQ.DESCRICAO LIKE '%LASER%' OR MAQ.DESCRICAO LIKE '%PLASMA%') "
+            r"GROUP BY TPL.COD_ITEM, TOR.NUM_ORDEM, TOR.QTDE, TIT.DESC_TECNICA, TFUN.NOME, TOR.tipo_ordem "
         )
         progamaveis_car = cur.fetchall()
         progamaveis_car = pd.DataFrame(progamaveis_car, columns=['COD_ITEM', 'NUM_ORDEM', 'QTDE'])
@@ -274,7 +274,7 @@ class DB:
             r"       TOR.QTDE,  "
             r"       MOV.QUANTIDADE, "
             r"       TOP.DESCRICAO, "
-            r"       TOR.TIPO_ORDEM "
+            r"       ROT.SEQ "
             r"FROM FOCCO3I.TORDENS TOR "
             r"INNER JOIN FOCCO3I.TORDENS_ROT ORD    ON TOR.ID = ORD.ORDEM_ID "
             r"INNER JOIN FOCCO3I.TROTEIRO ROT       ON ORD.TROTEIRO_ID = ROT.ID "
@@ -283,5 +283,7 @@ class DB:
             r"WHERE TOR.NUM_ORDEM IN (" + str(ordens) + ") "
         )
         qtd_disp_ops = cur.fetchall()
-        qtd_disp_ops = pd.DataFrame(qtd_disp_ops, columns=['NUM_ORDEM', 'QTD_ORDEM', 'QTD_APONT', 'OPERACAO', 'TP_ORDEM'])
+        qtd_disp_ops = pd.DataFrame(qtd_disp_ops, columns=[
+            'NUM_ORDEM', 'QTD_ORDEM', 'QTD_APONT', 'OPERACAO', 'SEQ'
+        ])
         return qtd_disp_ops

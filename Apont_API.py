@@ -4,7 +4,7 @@ from Com_Focco_API import APONT
 
 
 db_instance = DB()
-data_arranjo = TRATA_PDF('12236941')
+data_arranjo = TRATA_PDF('122459801')
 
 dt_arr = data_arranjo.get_data()
 print(dt_arr.to_string())
@@ -15,7 +15,7 @@ df_apontamentos = df_apontamentos.groupby(['NUM_ORDEM', 'QTD_ORDEM', 'OPERACAO',
 df_apontamentos['qtd_disponivel'] = df_apontamentos['QTD_ORDEM'] - df_apontamentos['QTD_APONT']
 #df_apontamentos = df_apontamentos[df_apontamentos['qtd_disponivel'] > 0]
 
-df_apontamentos = df_apontamentos.sort_values(by='SEQ')
+df_apontamentos = df_apontamentos.sort_values(by=['NUM_ORDEM', 'SEQ'])
 print(df_apontamentos.to_string())
 
 apont = APONT()

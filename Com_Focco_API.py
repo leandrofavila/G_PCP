@@ -6,7 +6,7 @@ from datetime import datetime, timezone, timedelta
 with open("config.json", "r") as cred:
     config = json.load(cred)
 
-BASE_URL = config["BASE_URL"]
+AUTHENTICATION = config["AUTHENTICATION"]
 APONTAMENTO_ENDPOINT = config["APONTAMENTO_ENDPOINT"]
 USER = config["USER"]
 PASSWORD = config["PASSWORD"]
@@ -23,11 +23,11 @@ class APONT:
             "Quantidade": qtd_apont,
             "DataApontamento": self.dt_time,
             "TipoApontamento": {
-                "ID": "TP"
+                "ID": "IH"
             },
-            "DataHoraInicio": None,
-            "DataHoraFim": None,
-            "Tempo": None,
+            "DataHoraInicio": self.dt_time,
+            "DataHoraFim": self.dt_time,
+            "Tempo": 4,
             "QtdeHomens": None,
             "Intervalo": None,
             "Funcionario": {
@@ -40,12 +40,13 @@ class APONT:
 
 
     def get_auth_token(self):
-        auth_url = f"{BASE_URL}"
+        auth_url = f"{AUTHENTICATION}"
         payload = {
             "User": USER,
             "Password": PASSWORD,
             "AllowNewSession": True
         }
+
         try:
             response = requests.post(auth_url, json=payload)
             response.raise_for_status()
@@ -59,9 +60,11 @@ class APONT:
             print("Erro ao autenticar:", e)
             return None
 
+
     def send_apontamento(self):
+        token = self.get_auth_token()
         headers = {
-            "Authorization": f"Bearer {self.get_auth_token}",
+            "Authorization": f"Bearer {token}",
             "Content-Type": "application/json"
         }
         try:
@@ -71,3 +74,10 @@ class APONT:
         except requests.RequestException as e:
             print("Erro ao enviar o apontamento:", e)
             return None
+
+
+
+if __name__ == "__main__":
+    aponta = APONT(1950040, 6, 398)#1224598
+    aponta.send_apontamento()
+

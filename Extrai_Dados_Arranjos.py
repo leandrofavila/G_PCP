@@ -33,7 +33,6 @@ class TRATA_PDF:
 
 
     def extract_text_from_page(self, pagina=None):
-
         pg = int(self.cod_barras[7:]) - 1
         if pagina is not None:
             pg += pagina
@@ -60,9 +59,14 @@ class TRATA_PDF:
         multiplicador = self.get_multiplicador()
 
         ordens_qtd = []
-        ordens_qtd.extend(re.findall(
-            r'^\d+\s\d+\s\d+\s\d+\.\d{2}\smm\s\d+\.\d{2}\smm\s\d+$', self.text, flags=re.MULTILINE
-        ))
+        if self.text is not None:
+            ordens_qtd.extend(re.findall(
+                r'^\d+\s\d+\s\d+\s\d+\.\d{2}\smm\s\d+\.\d{2}\smm\s\d+$', self.text, flags=re.MULTILINE
+            ))
+        else:
+            print("Pagina não encontrada ou vazia.")
+            quit()
+
         lis_to_dic = [list(w.split()) for w in set(ordens_qtd)]
 
         column_names = ['id', 'cod_item', 'qtd', 'Width', 'Width_Unit', 'Height', 'Height_Unit', 'num_ordem']
@@ -77,7 +81,11 @@ class TRATA_PDF:
 
 
     def get_multiplicador(self):
-        match = re.search(r'Peso total:\d+', self.text)
+        if self.text is not None:
+            match = re.search(r'Peso total:\d+', self.text)
+        else:
+            return "Pagina não encontrada no arranjo ou vazia"
+
         if match is None:
             self.text = self.extract_text_from_page(int(self.cod_barras[7:]) + 1)
             match = re.search(r'Peso total:\d+', self.text)

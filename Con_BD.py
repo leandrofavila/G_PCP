@@ -266,6 +266,7 @@ class DB:
         progamaveis_car = pd.DataFrame(progamaveis_car, columns=['COD_ITEM', 'NUM_ORDEM', 'QTDE'])
         return progamaveis_car
 
+
     def qtd_ops_apont_parciais(self, lis_ordens):
         cur = self.get_connection()
         ordens = ', '.join(lis_ordens)

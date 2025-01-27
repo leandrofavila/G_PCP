@@ -13,9 +13,10 @@ PASSWORD = config["PASSWORD"]
 
 
 class APONT:
-    def __init__(self, operacao_id=None, qtd_apont=None, func_id=None):
+    def __init__(self, operacao_id=None, qtd_apont=None, func_id=None, final=False):
         dt_now = datetime.now(timezone(timedelta(hours=-3))).strftime("%Y-%m-%dT%H:%M:%S%z")
         self.dt_time = dt_now[:-2] + ":" + dt_now[-2:]
+        self.final = final
         self.apontamento_data = {
             "OrdemRoteiro": {
                 "ID": operacao_id
@@ -27,16 +28,18 @@ class APONT:
             },
             "DataHoraInicio": self.dt_time,
             "DataHoraFim": self.dt_time,
-            "Tempo": 4,
+            "Tempo": 0,
             "QtdeHomens": None,
             "Intervalo": None,
             "Funcionario": {
                 "ID": func_id
             },
-            "Final": True,
+            "Final": self.final,
             "Usuario": "Apontamento API",
             "OrigemApontamento": "API"
         }
+# todo - setar final como True somente se a quantidade fechar com a quantidade da ordem
+
 
 
     def get_auth_token(self):
@@ -78,6 +81,6 @@ class APONT:
 
 
 if __name__ == "__main__":
-    aponta = APONT(1950040, 6, 398)#1224598
+    aponta = APONT(1950753, 6, 2272, False)#1224735
     aponta.send_apontamento()
 

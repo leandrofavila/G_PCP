@@ -189,7 +189,7 @@ class DB:
             r"INNER JOIN FOCCO3I.TSRENG_ORDENS_VINC_CAR VINC      ON TOR.ID = VINC.ORDEM_ID "
             r"INNER JOIN FOCCO3I.TSRENGENHARIA_CARREGAMENTOS CAR  ON VINC.CARERGAM_ID = CAR.ID "
             r"WHERE CAR.CARREGAMENTO IN (" + car + ")  "
-                                                   r"" + pms + " "
+            r"" + pms + " "
         )
         ordens_pm_carregamento = pd.DataFrame(cur.fetchall(), columns=["NUM_ORDEM", "COD_ITEM", "DESC_TECNICA", "QTDE"])
         cur.close()

@@ -32,13 +32,28 @@ class TRATA_PDF:
         return None
 
 
-    def extract_text_from_page(self, pagina=None):
+    def extract_text_from_page(self, pagina=None, pagina_end=None):
         pg = int(self.cod_barras[7:]) - 1
+        path = self.find_pdf()
+        reader = PdfReader(path)
+
+        print(pg, pagina,  pagina_end)
+
         if pagina is not None:
             pg += pagina
 
-        path = self.find_pdf()
-        reader = PdfReader(path)
+
+        if pagina_end is not None:
+            try:
+                for pages in range(pg, pagina_end):
+                    page = reader.pages[pages]
+                    self.text = page.extract_text()
+                    print(self.text)
+                    quit()
+            except IndexError:
+                self.text = None
+
+
 
         try:
             page = reader.pages[pg]
@@ -47,10 +62,16 @@ class TRATA_PDF:
             self.text = None
 
         if self.text is None or self.cod_barras not in self.text:
+            print(self.cod_barras in self.text)
             self.ct += 1
             if self.ct >= len(reader.pages):
                 return None
             return self.extract_text_from_page(pagina=self.ct)
+
+        if 'Tempo Total do EventoTEMPO SETUP' not in self.text:
+            print('Tempo Total do EventoTEMPO SETUP' in self.text)
+            pg_end = pg + 2
+            return self.extract_text_from_page(pagina_end=pg_end)
 
         return self.text
 
@@ -95,7 +116,8 @@ class TRATA_PDF:
         return multiplicador
 
 
-
 if __name__ == "__main__":
-    tr_pdf = TRATA_PDF('12109403')
+    #todo em arranjos como 12246731 não ta retornando valores da prozima pagina deve retornar 13 itens retorna somente 10
+    tr_pdf = TRATA_PDF('12246731')
     print(tr_pdf.get_data().to_string())
+

@@ -4,7 +4,7 @@ from Com_Focco_API import APONT
 
 
 db_instance = DB()
-data_arranjo = TRATA_PDF('122459801')
+data_arranjo = TRATA_PDF('12109402')
 
 dt_arr = data_arranjo.get_data()
 print(dt_arr.to_string())
